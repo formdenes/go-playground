@@ -2,38 +2,45 @@ package main
 
 import (
 	"image/color"
-	"math"
 
 	"github.com/go-p5/p5"
+	"github.com/quartercastle/vector"
 )
 
+type vec = vector.Vector
+
+const w = 1000
+const h = 1000
+const border = 100
+
+var points []vec
+var proc p5.Proc
+
 func main() {
+	proc = p5.Proc{}
 	p5.Run(setup, draw)
 }
 
 func setup() {
-	p5.Canvas(400, 400)
-	p5.Background(color.Gray{Y: 220})
+	p5.Canvas(w, h)
+	p5.Background(color.White)
+	rows := 10
+	columns := 10
+	for i := range rows {
+		for j := range columns {
+			x := (w-border)/columns*i + border
+			y := (w-border)/rows*j + border
+			points = append(points, vec{float64(x), float64(y)})
+		}
+	}
 }
 
 func draw() {
-	p5.StrokeWidth(2)
-	p5.Fill(color.RGBA{R: 255, A: 208})
-	p5.Ellipse(50, 50, 80, 80)
-
-	p5.Fill(color.RGBA{B: 255, A: 208})
-	p5.Quad(50, 50, 80, 50, 80, 120, 60, 120)
-
-	p5.Fill(color.RGBA{G: 255, A: 208})
-	p5.Rect(200, 200, 50, 100)
-
-	p5.Fill(color.RGBA{G: 255, A: 208})
-	p5.Triangle(100, 100, 120, 120, 80, 120)
-
-	p5.TextSize(24)
-	p5.Text("Hello, World!", 10, 300)
-
-	p5.Stroke(color.Black)
-	p5.StrokeWidth(5)
-	p5.Arc(300, 100, 80, 20, 0, 1.5*math.Pi)
+	p5.Background(color.White)
+	var p p5.Path
+	for _, point := range points {
+		// p5.Circle(point.X(), point.Y(), 2)
+		p.Vertex(point.X(), point.Y())
+	}
+	p.End()
 }

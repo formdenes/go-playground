@@ -9,6 +9,7 @@ require (
 	gioui.org/cpu v0.0.0-20210727122813-41509bcd3462 // indirect
 	github.com/campoy/embedmd v1.0.0 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
+	github.com/quartercastle/vector v0.2.0 // indirect
 	golang.org/x/exp v0.0.0-20230425010034-47ecfdc1ba53 // indirect
 	golang.org/x/exp/shiny v0.0.0-20230425010034-47ecfdc1ba53 // indirect
 	golang.org/x/image v0.7.0 // indirect
