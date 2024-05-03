@@ -14,10 +14,11 @@ const h = 1000
 const border = 100
 
 var points []vec
-var proc p5.Proc
+
+// var proc p5.Proc
 
 func main() {
-	proc = p5.Proc{}
+	// proc = p5.Proc{}
 	p5.Run(setup, draw)
 }
 
@@ -37,10 +38,10 @@ func setup() {
 
 func draw() {
 	p5.Background(color.White)
-	var p p5.Path
+	// var p p5.Path
 	for _, point := range points {
-		// p5.Circle(point.X(), point.Y(), 2)
-		p.Vertex(point.X(), point.Y())
+		p5.Circle(point.X(), point.Y(), 2)
+		// p.Vertex(point.X(), point.Y())
 	}
-	p.End()
+	// p.End()
 }
