@@ -22,3 +22,12 @@ go.work
 
 # Vs Code files
 launch.json
+
+# MacOS files
+.DS_Store
+
+# tmp files
+tmp/
+
+# config
+config.yml
