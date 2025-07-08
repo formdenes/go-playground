@@ -22,6 +22,31 @@ type Ring struct {
 	ampl       float64
 }
 
+type Options struct {
+	NumberOfRings int
+	Ampl          float64
+	MinDistance   float64
+	Smoothness    float64
+	Seed          *int64
+	NoiseType     *noise.Algo
+	Time          *float64
+}
+
+func (o *Options) SetDefaults() {
+	if o.Seed == nil {
+		noiseSeed := NOISE_SEED
+		o.Seed = &noiseSeed
+	}
+	if o.NoiseType == nil {
+		noiseType := NOISE_TYPE
+		o.NoiseType = &noiseType
+	}
+	if o.Time == nil {
+		time := float64(0)
+		o.Time = &time
+	}
+}
+
 func (r *Ring) draw() {
 	if r == nil {
 		return
@@ -44,31 +69,23 @@ func (r *Ring) GetPoints() [RESOLUTION]vec {
 	return r.points
 }
 
-func NewRing(prevRing *Ring, ampl float64, smoothness float64, count int) *Ring {
-	// if prevRing == nil {
-	// 	var points [RESOLUTION]vec
-	// 	for i := range RESOLUTION {
-	// 		radians := float64(i) * (math.Pi / float64(PI))
-	// 		x := (INIT_RADIAL * math.Cos(radians))
-	// 		y := (INIT_RADIAL * math.Sin(radians))
-	// 		points[i] = vec{x, y}
-	// 	}
-	// 	return &Ring{
-	// 		points:     points,
-	// 		smoothness: smoothness,
-	// 		ampl:       ampl,
-	// 	}
-	// }
+func NewRing(prevRing *Ring, count int, options Options) *Ring {
 	var points [RESOLUTION]vec
-	ng, err := noise.New(NOISE_TYPE, NOISE_SEED*int64(count+1))
+	options.SetDefaults()
+	noiseSeed := *options.Seed * int64(count+1)
+	noiseType := *options.NoiseType
+	smoothness := options.Smoothness
+	time := *options.Time
+	ampl := options.Ampl
+	ng, err := noise.New(noiseType, noiseSeed)
 	if err != nil {
 		return nil
 	}
-	ns, err := noise.New(NOISE_TYPE, NOISE_SEED*5000*int64(count+1))
+	ns, err := noise.New(noiseType, 5000*noiseSeed)
 	if err != nil {
 		return nil
 	}
-	nss, err := noise.New(NOISE_TYPE, NOISE_SEED*15000*int64(count+1))
+	nss, err := noise.New(noiseType, 15000*noiseSeed)
 	if err != nil {
 		return nil
 	}
@@ -85,10 +102,10 @@ func NewRing(prevRing *Ring, ampl float64, smoothness float64, count int) *Ring 
 	}
 	for i := range RESOLUTION {
 		prevPoint := prevPoints[i]
-		drg := (ng.Eval64(prevPoint.X()/smoothness, prevPoint.Y()/smoothness) + 1) * ampl
-		drs := (ns.Eval64(prevPoint.X()/smoothness, prevPoint.Y()/smoothness) + 1) * ampl / 10
-		drss := (nss.Eval64(prevPoint.X()/smoothness, prevPoint.Y()/smoothness) + 1) * ampl / 15
-		noiseVal := drg + drs + drss
+		drg := (ng.Eval64(prevPoint.X()/smoothness, prevPoint.Y()/smoothness, time) + 1) * ampl
+		drs := (ns.Eval64(prevPoint.X()/smoothness, prevPoint.Y()/smoothness, time) + 1) * ampl / 10
+		drss := (nss.Eval64(prevPoint.X()/smoothness, prevPoint.Y()/smoothness, time) + 1) * ampl / 15
+		noiseVal := math.Max((drg + drs + drss), options.MinDistance)
 		step := prevPoint.Unit().Scale(noiseVal)
 		point := prevPoint.Add(step)
 		points[i] = point
@@ -101,7 +118,8 @@ func NewRing(prevRing *Ring, ampl float64, smoothness float64, count int) *Ring 
 }
 
 type TreeSection struct {
-	rings []*Ring
+	rings   []*Ring
+	options Options
 }
 
 func (t *TreeSection) Draw() {
@@ -122,14 +140,15 @@ func (t *TreeSection) GetRings() []*Ring {
 
 func (t *TreeSection) AddRing() {
 	lastRing := t.rings[len(t.rings)-1]
-	t.rings = append(t.rings, NewRing(lastRing, lastRing.ampl, lastRing.smoothness, len(t.rings)))
+	t.rings = append(t.rings, NewRing(lastRing, len(t.rings), t.options))
 }
 
-func NewTreeSection(numberOfRings int, ampl float64, smoothness float64) *TreeSection {
+func NewTreeSection(options Options) *TreeSection {
 	tree := &TreeSection{
-		rings: []*Ring{NewRing(nil, ampl, smoothness, 0)},
+		rings:   []*Ring{NewRing(nil, 0, options)},
+		options: options,
 	}
-	for range numberOfRings - 1 {
+	for range options.NumberOfRings - 1 {
 		tree.AddRing()
 	}
 	return tree
