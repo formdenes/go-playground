@@ -11,7 +11,7 @@ import (
 )
 
 const col int = 5
-const row int = 4
+const row int = 7
 
 const ringNum int = 25
 const ampl float64 = 15
@@ -32,21 +32,24 @@ func Draw(ctx *canvas.Context, w float64, h float64, seed int64) {
 	scaleH := h / (float64(row) * finalDiameter)
 	scale := math.Min(scaleH, scaleW)
 	drawChan := make(chan TreeSectionDraw)
+	seeds := utils.GenerateRandomSequence(seed, col)
+	// seeds := utils.GenerateRandomSequence(100000, col)
 	var wg sync.WaitGroup
 	for i := 0; i < col; i++ {
 		for j := 0; j < row; j++ {
 			wg.Add(1)
 			go func(i int, j int) {
 				defer wg.Done()
-				// seed := int64(j*10000) + int64(i*10)
-				seed := int64(100000)
-				time := float64(i) / 3.5 // + float64(i*10)
+				// seed := int64(k*10000) + int64(j*10)
+				// seed := int64(100000)
+				seed := int64(seeds[i])
+				time := float64(j) / 3.5 // + float64(j*10)
 				noiseType := noise.OpenSimplex
 				// curAmpl := ampl
-				curAmpl := ampl - float64(i)/4
+				curAmpl := ampl - float64(j)/4
 				minDistance := curAmpl * minDistanceRatio
-				smoothness := smoothness - float64(j*30)
-				numberOfRings := ringNum - i
+				smoothness := smoothness - float64(i*24)
+				numberOfRings := ringNum - j
 				treesection := treesection.NewTreeSection(treesection.Options{
 					NumberOfRings: numberOfRings,
 					Ampl:          curAmpl,

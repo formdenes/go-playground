@@ -9,10 +9,10 @@ import (
 	"github.com/tdewolff/canvas/renderers"
 )
 
-const w float64 = 490
-const h float64 = 390
+const w float64 = 390
+const h float64 = 490
 
-const imageNum int = 1
+const imageNum int = 9
 
 const dir string = "export/treesection/"
 const name string = "treesection"
@@ -31,7 +31,7 @@ func main() {
 		// 	panic(err)
 		// }
 
-		if err := renderers.Write(fmt.Sprintf("%s%s-%d.svg", dir, name, seed), c); err != nil {
+		if err := renderers.Write(fmt.Sprintf("%s%s-bach-%d.svg", dir, name, seed), c); err != nil {
 			panic(err)
 		}
 	}
